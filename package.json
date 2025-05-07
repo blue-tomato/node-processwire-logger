@@ -1,17 +1,15 @@
 {
   "name": "node-processwire-logger",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Node.js module to log directly into the ProcessWire CMS/CMF log",
-  "main": "index.js",
+  "type": "module",
+  "main": "logger.mjs",
   "contributors": [
-    "Markus Tiefenbacher <markus.tiefenbacher@blue-tomato.com>",
-    "Manuel Penaloza <manuel.penaloza@blue-tomato.com>"
+    "Markus Tiefenbacher <markus.tiefenbacher@blue-tomato.com>"
   ],
-  "dependencies": {
-    "date-fns": "^1.29.0"
-  },
-  "engine": {
-    "node": ">= 8.0.0"
+  "dependencies": {},
+  "engines": {
+    "node": ">=22.0.0"
   },
   "license": "MIT"
 }
