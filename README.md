@@ -13,15 +13,18 @@ npm install node-processwire-logger --safe
 
 ## Usage
 ```javascript
-const Logger = require('node-processwire-logger');
+// ES-Module import (ensure "type": "module" in your package.json)
+import Logger from 'node-processwire-logger';
+
 const logger = new Logger('my-logfile-name', __dirname + '/site/assets/');
 
-// log a message
-logger.write('Jon Doe', '/my-awesome-page', 'Hello from Node.js!');
+// write a log entry
+logger.log('Jon Doe', '/my-awesome-page', 'Hello from Node.js!');
 
-// since we have an open filestream, the file should be closed if it's not in use
+// when done (e.g. in a cron job), close the stream
 logger.close();
 
+// exit process if needed
 process.exit();
 ```
 
