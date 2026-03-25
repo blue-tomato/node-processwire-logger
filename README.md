@@ -1,61 +1,75 @@
-# node-processwire-logger                                                                                                                                    
-                                                                                                                                                               
-  ---                                                                                                                                                          
-                                                                                                                                                             
-  Node.js module to log directly into the ProcessWire CMS/CMF log                                                                                              
-   
-                                                                                                                                                               
-  ## Installation                                                                                                                                            
-  ```bash
-  npm install node-processwire-logger --safe
+# node-processwire-logger
 
-  Usage
+Node.js module to log directly into the ProcessWire CMS/CMF log.
 
-  // ES-Module import (ensure "type": "module" in your package.json)
-  import Logger from 'node-processwire-logger';
-                                                                                                                                                               
-  const logger = new Logger('my-logfile-name', __dirname + '/site/assets/');
-                                                                                                                                                               
-  // write a log entry                                                                                                                                       
-  logger.log('Jon Doe', '/my-awesome-page', 'Hello from Node.js!');
+## Installation
 
-  // when done (e.g. in a cron job), close the stream                                                                                                          
-  logger.close();
-                                                                                                                                                               
-  // exit process if needed                                                                                                                                  
-  process.exit();
+```bash
+npm install node-processwire-logger
+```
 
-  Methods
+## Usage
 
-  new Logger()
+```js
+// ES-Module import (ensure "type": "module" in your package.json)
+import Logger from 'node-processwire-logger';
 
-  new Logger(String logFileName, String assetsPath)
+const logger = new Logger('my-logfile-name', import.meta.dirname + '/site/assets/');
 
-  - logFileName: The name of the log file. This will be lowerCased.                                                                                            
-  - assetsPath: Absolute path to you ProcessWire assets in your filesystem
-                                                                                                                                                               
-  logger.log()                                                                                                                                               
+// write a log entry
+logger.log('Jon Doe', '/my-awesome-page', 'Hello from Node.js!');
 
-  logger.log(String userName, String url, String message)
+// when done (e.g. in a cron job), close the stream
+await logger.close();
 
-  - userName: The user who should be named in the logs. Default is "nodejs"                                                                                    
-  - url: The URL which should be named in the logs. Default is "?",
-  - message: Your log message. Default is an empty string.                                                                                                     
-                                                                                                                                                             
-  logger.close()
+// exit process if needed
+process.exit();
+```
 
-  Method to close the open filestream. E.g. Should be used in cronjobs before process.exit()                                                                   
-   
-  LICENCE                                                                                                                                                      
-                                                                                                                                                             
-  Copyright 2025 Blue Tomato GmbH
+### Async initialization (non-blocking)
 
-  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in
-   the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-  of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:                                      
-                                                                                                                                                             
-  The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.                               
-   
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS  
-  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-   IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+If you need to create the logger during request handling or inside an
+async context, use the static factory method to avoid blocking the
+event loop:
+
+```js
+const logger = await Logger.create('my-logfile-name', import.meta.dirname + '/site/assets/');
+```
+
+## Methods
+
+### `new Logger(logFileName, assetsPath)`
+
+| Parameter     | Type     | Default         | Description                                              |
+| ------------- | -------- | --------------- | -------------------------------------------------------- |
+| `logFileName` | `string` | —               | Name of the log file (will be lowercased and sanitized)  |
+| `assetsPath`  | `string` | `process.cwd()` | Absolute path to your ProcessWire `assets/` directory    |
+
+### `Logger.create(logFileName, assetsPath)` → `Promise<Logger>`
+
+Same parameters as the constructor. Creates the `logs/` directory
+asynchronously before returning the Logger instance.
+
+### `logger.log(userName, url, message)` → `boolean`
+
+| Parameter  | Type     | Default    | Description                                       |
+| ---------- | -------- | ---------- | ------------------------------------------------- |
+| `userName` | `string` | `'nodejs'` | User to be named in the log entry                 |
+| `url`      | `string` | `'?'`      | URL to be named in the log entry                  |
+| `message`  | `string` | `'-'`      | Your log message                                  |
+
+Returns `false` when the internal buffer is full (backpressure).
+
+### `logger.close()` → `Promise<void>`
+
+Gracefully closes the write stream. **Always `await` this before
+calling `process.exit()`** to ensure all data is flushed.
+
+### `logger.healthy` → `boolean`
+
+Read-only property. Returns `true` if the stream is open and has not
+encountered an error.
+
+## License
+
+MIT
