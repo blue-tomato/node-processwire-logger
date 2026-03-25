@@ -79,12 +79,26 @@ export default class Logger {
   }
 
   /**
-   * UTC timestamp in ISO 8601 format.
-   * Using UTC avoids ambiguity across timezones and DST transitions.
+   * Timestamp in ProcessWire-compatible format (Y-m-d H:i:s, local time).
+   *
+   * ProcessWire's FileLog::save() uses PHP's date("Y-m-d H:i:s") to generate
+   * timestamps, and FileLog::isValidLine() validates that:
+   *  - position 4 and 7 are "-"
+   *  - position 10 is a space
+   *  - position 19 is the tab delimiter
+   *
+   * JavaScript's toISOString() produces "2023-10-22T15:18:43.123Z" (24 chars)
+   * which fails validation because position 10 is "T" instead of " " and the
+   * tab delimiter lands at position 24 instead of 19. Using local time also
+   * matches PHP's date() behavior, which defaults to the server timezone.
+   *
+   * @see https://github.com/processwire/processwire/blob/master/wire/core/FileLog.php
    * @returns {string}
    */
   #timestamp() {
-    return new Date().toISOString();
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
   }
 
   /**

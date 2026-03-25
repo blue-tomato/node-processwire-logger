@@ -133,8 +133,8 @@ describe('log()', () => {
     const parts = content.trim().split('\t');
 
     assert.equal(parts.length, 4);
-    // ISO 8601 timestamp
-    assert.doesNotThrow(() => new Date(parts[0]).toISOString());
+    // ProcessWire-compatible timestamp (Y-m-d H:i:s)
+    assert.match(parts[0], /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
     assert.equal(parts[1], 'admin');
     assert.equal(parts[2], '/dashboard');
     assert.equal(parts[3], 'page viewed');
